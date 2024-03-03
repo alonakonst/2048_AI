@@ -1,4 +1,5 @@
 import pygame
+import random
 
 pygame.init()
 
@@ -34,8 +35,68 @@ colors = {0: (204, 192, 179),
           'bg': (187, 173, 160)}
 
 #initialization of board values, which is a 2D array:
-board_values = [[0 for b_v in range(4)] for b_v in range(4)]
+board_values = [[ 0 for b_v in range(4)] for b_v in range(4)]
+get_new = True
+game_over = False
+init_count = 0
+key_direction = ''
 
+#take a turn depending on direction of the key
+def  take_turn(key_direction, board):
+
+
+    if key_direction == 'UP':
+        merged_cells = []
+        for row in range(4):
+            for col in range(4):
+                if row > 0 :
+                    if board[row][col]!=0:
+                        if board[row][col]==board[row-1][col] and (row-1,col) not in merged_cells:
+                            board[row-1][col] += board[row][col]
+                            board[row][col]=0
+                            merged_cells.append((row-1, col))
+
+                        if board[row-1][col]==0 and board[row][col]==board[row-2][col] and ( (row-2,col) not in merged_cells):
+                            board[row-2][col] += board[row][col]
+                            board[row][col] = 0
+                            merged_cells.append((row-2, col))
+
+                        if board[row-1][col]==0 and board[row-2][col]==0 and board[row][col]==board[row-3][col] and ((row-3,col) not in merged_cells):
+                            board[row-3][col] += board[row][col]
+                            board[row][col] = 0
+                            merged_cells.append((row-3, col))
+
+    elif key_direction == 'DOWN':
+        pass
+
+    elif key_direction == 'LEFT':
+        pass
+
+    elif key_direction == 'RIGHT':
+        pass
+
+
+    return board
+
+
+#get new pieces randomly. There is 1 out of 10 chance to get 4, otherwise is 2
+def get_new_tiles(board):
+    empty_cells=[]
+    for row in range(4):
+        for col in range(4):
+            if board[row][col]==0:
+                empty_cells.append((row,col))
+    random_empty_cell = random.choice(empty_cells)
+
+    if len(empty_cells)==0:
+        game_over=True
+
+    if random.randint(1, 10) == 10:
+        board[random_empty_cell[0]][random_empty_cell[1]] = 4
+    else:
+        board[random_empty_cell[0]][random_empty_cell[1]] = 2
+    print(random_empty_cell)
+    return board
 
 #draw background for the board
 def draw_board():
@@ -55,6 +116,13 @@ def draw_pieces(board):
             else:
                 color = colors['other']
             pygame.draw.rect(screen, color, [j*70+20,i*70+20+(screen_height*0.25),56.25,56.25],0,5)
+            if value > 0:
+                value_len=len(str(value))
+                font = pygame.font.Font(font_name, 40-(5*value_len))
+                value_text = font.render(str(value), True, value_color)
+                text_rect = value_text.get_rect(center = (j*70+48.125, (screen_height*0.25)+i*70+48.125))
+                screen.blit(value_text,text_rect)
+
 
 # Main loop
 run = True
@@ -64,10 +132,30 @@ while run:
     draw_board()
     draw_pieces(board_values)
 
+    if get_new or init_count < 2:
+        board_values = get_new_tiles(board_values)
+        get_new = False
+        init_count +=1
+
+    if key_direction != '':
+        board_values = take_turn(key_direction, board_values)
+        key_direction = ''
+        get_new = True
+
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                key_direction = 'UP'
+            elif event.key == pygame.K_DOWN:
+                key_direction = 'DOWN'
+            elif event.key == pygame.K_LEFT:
+                key_direction = 'LEFT'
+            elif event.key == pygame.K_RIGHT:
+                key_direction = 'RIGHT'
 
     pygame.display.flip()
 
