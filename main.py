@@ -41,42 +41,67 @@ game_over = False
 init_count = 0
 key_direction = ''
 
-#take a turn depending on direction of the key
-def  take_turn(key_direction, board):
+def turn_up(board):
+    merged_cells = []
+    for row in range(4):
+        for col in range(4):
+            board=swipe_not_equal_up(board, row, col)
+            if row > 0:
+                if board[row][col] != 0:
 
+                    # case if two neighbouring are equal
+                    if board[row][col] == board[row - 1][col] and (row - 1, col) not in merged_cells:
+                        board[row - 1][col] += board[row][col]
+                        board[row][col]=0
+                        board = swipe_not_equal_up(board, row, col)
+                        merged_cells.append((row - 1, col))
 
-    if key_direction == 'UP':
-        merged_cells = []
-        for row in range(4):
-            for col in range(4):
-                if row > 0 :
-                    if board[row][col]!=0:
-                        if board[row][col]==board[row-1][col] and (row-1,col) not in merged_cells:
-                            board[row-1][col] += board[row][col]
-                            board[row][col]=0
-                            merged_cells.append((row-1, col))
-
-                        if board[row-1][col]==0 and board[row][col]==board[row-2][col] and ( (row-2,col) not in merged_cells):
-                            board[row-2][col] += board[row][col]
+                    # case if there is two empty cell between two non empty
+                    if board[row - 1][col] == 0 and board[row - 2][col] == 0 and board[row - 3][col] != 0 and (
+                            (row - 3, col) not in merged_cells):
+                        # if they are equal
+                        if board[row][col] == board[row - 3][col]:
+                            board[row - 3][col] += board[row][col]
                             board[row][col] = 0
-                            merged_cells.append((row-2, col))
-
-                        if board[row-1][col]==0 and board[row-2][col]==0 and board[row][col]==board[row-3][col] and ((row-3,col) not in merged_cells):
-                            board[row-3][col] += board[row][col]
+                            board=swipe_not_equal_up(board, row, col)
+                            merged_cells.append((row - 3, col))
+                        # if they not equal
+                        else:
+                            board[row - 3][col] = board[row][col]
                             board[row][col] = 0
-                            merged_cells.append((row-3, col))
+                            merged_cells.append((row - 3, col))
 
-    elif key_direction == 'DOWN':
-        pass
+                    # case if there is one empty cell between two nonempty
+                    if board[row - 1][col] == 0 and ((row - 2, col) not in merged_cells):
 
-    elif key_direction == 'LEFT':
-        pass
+                        # case if they are equal
+                        if board[row][col] == board[row - 2][col]:
+                            board[row - 2][col] += board[row][col]
+                            board[row][col] = 0
+                            board=swipe_not_equal_up(board, row, col)
+                            merged_cells.append((row - 2, col))
 
-    elif key_direction == 'RIGHT':
-        pass
+                        # case if they are not equal
+                        else:
+                            board[row - 1][col] = board[row][col]
+                            board[row][col] = 0
+                            merged_cells.append((row - 1, col))
+    return board
 
+def swipe_not_equal_up(board,row,col):
+
+    if row < 3:
+        if board[row][col] == 0:
+            board[row][col] = board[row + 1][col]
+            board[row + 1][col] = 0
 
     return board
+
+
+def turn_down(board):
+   return board
+
+
 
 
 #get new pieces randomly. There is 1 out of 10 chance to get 4, otherwise is 2
@@ -137,11 +162,15 @@ while run:
         get_new = False
         init_count +=1
 
-    if key_direction != '':
-        board_values = take_turn(key_direction, board_values)
+    if key_direction == 'UP':
+        board_values = turn_up(board_values)
         key_direction = ''
         get_new = True
 
+    if key_direction == 'DOWN':
+        board_values = turn_down(board_values)
+        key_direction = ''
+        get_new = True
 
 
     for event in pygame.event.get():
