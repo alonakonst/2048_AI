@@ -1,5 +1,6 @@
 import pygame
 import random
+from board import Board
 
 pygame.init()
 
@@ -42,66 +43,82 @@ init_count = 0
 key_direction = ''
 
 def turn_up(board):
-    merged_cells = []
+    merged = [[False for _ in range(4)] for _ in range(4)]
     for row in range(4):
         for col in range(4):
-            board=swipe_not_equal_up(board, row, col)
+            shift = 0
             if row > 0:
-                if board[row][col] != 0:
-
-                    # case if two neighbouring are equal
-                    if board[row][col] == board[row - 1][col] and (row - 1, col) not in merged_cells:
-                        board[row - 1][col] += board[row][col]
-                        board[row][col]=0
-                        board = swipe_not_equal_up(board, row, col)
-                        merged_cells.append((row - 1, col))
-
-                    # case if there is two empty cell between two non empty
-                    if board[row - 1][col] == 0 and board[row - 2][col] == 0 and board[row - 3][col] != 0 and (
-                            (row - 3, col) not in merged_cells):
-                        # if they are equal
-                        if board[row][col] == board[row - 3][col]:
-                            board[row - 3][col] += board[row][col]
-                            board[row][col] = 0
-                            board=swipe_not_equal_up(board, row, col)
-                            merged_cells.append((row - 3, col))
-                        # if they not equal
-                        else:
-                            board[row - 3][col] = board[row][col]
-                            board[row][col] = 0
-                            merged_cells.append((row - 3, col))
-
-                    # case if there is one empty cell between two nonempty
-                    if board[row - 1][col] == 0 and ((row - 2, col) not in merged_cells):
-
-                        # case if they are equal
-                        if board[row][col] == board[row - 2][col]:
-                            board[row - 2][col] += board[row][col]
-                            board[row][col] = 0
-                            board=swipe_not_equal_up(board, row, col)
-                            merged_cells.append((row - 2, col))
-
-                        # case if they are not equal
-                        else:
-                            board[row - 1][col] = board[row][col]
-                            board[row][col] = 0
-                            merged_cells.append((row - 1, col))
-    return board
-
-def swipe_not_equal_up(board,row,col):
-
-    if row < 3:
-        if board[row][col] == 0:
-            board[row][col] = board[row + 1][col]
-            board[row + 1][col] = 0
+                #detect how much shift has to happen
+                for element in range(row):
+                    if board[element][col] == 0:
+                        shift += 1
+                if shift > 0:
+                    board[row - shift][col] = board[row][col]
+                    board[row][col] = 0
+                if board[row - shift - 1][col] == board[row - shift][col] and not merged[row - shift][col] \
+                        and not merged[row - shift - 1][col]:
+                    board[row - shift - 1][col] *= 2
+                    board[row - shift][col] = 0
+                    merged[row - shift - 1][col] = True
 
     return board
-
 
 def turn_down(board):
+    merged = [[False for _ in range(4)] for _ in range(4)]
+    for row in range(3):
+        for col in range(4):
+            shift = 0
+            for element in range(row + 1):
+                if board[3 - element][col] == 0:
+                    shift += 1
+            if shift > 0:
+                board[2 - row + shift][col] = board[2 - row][col]
+                board[2 - row][col] = 0
+            if 3 - row + shift <= 3:
+                if board[2 - row + shift][col] == board[3 - row + shift][col] and not merged[3 - row + shift][col] \
+                        and not merged[2 - row + shift][col]:
+                    board[3 - row + shift][col] *= 2
+                    board[2 - row + shift][col] = 0
+                    merged[3 - row + shift][col] = True
+    return board
+
+def turn_right(board):
+   merged = [[False for _ in range(4)] for _ in range(4)]
+   for row in range(4):
+       for col in range(4):
+           shift = 0
+           for element in range(col):
+               if board[row][3 - element] == 0:
+                   shift += 1
+           if shift > 0:
+               board[row][3 - col + shift] = board[row][3 - col]
+               board[row][3 - col] = 0
+           if 4 - col + shift <= 3:
+               if board[row][4 - col + shift] == board[row][3 - col + shift] and not merged[row][4 - col + shift] \
+                       and not merged[row][3 - col + shift]:
+                   board[row][4 - col + shift] *= 2
+                   board[row][3 - col + shift] = 0
+                   merged[row][4 - col + shift] = True
    return board
 
+def turn_left(board):
+   merged = [[False for _ in range(4)] for _ in range(4)]
+   for row in range(4):
+       for col in range(4):
+           shift = 0
+           for element in range(col):
+               if board[row][element] == 0:
+                   shift += 1
+           if shift > 0:
+               board[row][col - shift] = board[row][col]
+               board[row][col] = 0
+           if board[row][col - shift] == board[row][col - shift - 1] and not merged[row][col - shift - 1] \
+                   and not merged[row][col - shift]:
+               board[row][col - shift - 1] *= 2
+               board[row][col - shift] = 0
+               merged[row][col - shift - 1] = True
 
+   return board
 
 
 #get new pieces randomly. There is 1 out of 10 chance to get 4, otherwise is 2
@@ -169,6 +186,16 @@ while run:
 
     if key_direction == 'DOWN':
         board_values = turn_down(board_values)
+        key_direction = ''
+        get_new = True
+
+    if key_direction == 'RIGHT':
+        board_values = turn_right(board_values)
+        key_direction = ''
+        get_new = True
+
+    if key_direction == 'LEFT':
+        board_values = turn_left(board_values)
         key_direction = ''
         get_new = True
 
