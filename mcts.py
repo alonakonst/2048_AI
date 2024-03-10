@@ -1,4 +1,8 @@
+n_simulations = 300
 
+def getBoardCopy(board):
+    board_copy = [row[:] for row in board]
+    return board_copy
 
 def perform_action(state, action):
     # Apply action to the game state and return the new state

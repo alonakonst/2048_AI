@@ -36,9 +36,6 @@ def draw_button():
     screen.blit(button_text, text_rect)  # Draw the text on th
 
 
-
-
-
 # Main loop
 run = True
 while run:
@@ -53,26 +50,47 @@ while run:
         board.get_new = False
         board.init_count +=1
 
+    if board.board_is_full():
+        #text = font.render('Game over', True, (255, 255, 255))  # Render the text
+        #text_pos = text.get_rect(center=(150, 55))  # Position the text in the center of the button
+        #screen.blit(text, text_pos)
+        print('its full')
+        run = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_UP:
+                board_temp = tuple(map(tuple, board.board_values))  # Convert to tuple for comparison
                 board_values = board.turn_up(board.board_values)
                 key_direction = ''
-                board.get_new = True
-            elif event.key == pygame.K_DOWN:
+                if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
+                    board.get_new = True
+
+            if event.key == pygame.K_DOWN:
+                board_temp = tuple(map(tuple, board.board_values))
                 board_values = board.turn_down(board.board_values)
                 key_direction = ''
-                board.get_new = True
+                if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
+                    board.get_new = True
+
+
             elif event.key == pygame.K_LEFT:
+                board_temp = tuple(map(tuple, board.board_values))  # Convert to tuple for comparison
                 board_values = board.turn_left(board.board_values)
                 key_direction = ''
-                board.get_new = True
+                if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
+                    board.get_new = True
+
+
             elif event.key == pygame.K_RIGHT:
+                board_temp = tuple(map(tuple, board.board_values))  # Convert to tuple for comparison
                 board_values = board.turn_right(board.board_values)
                 key_direction = ''
-                board.get_new = True
+                if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
+                    board.get_new = True
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left mouse button
                 if button.collidepoint(event.pos):  # Check if the mouse click is within the button
@@ -82,6 +100,7 @@ while run:
                     print(current_node.state)
                     current_node.children = board.create_children_set()
                     print(current_node.children)
+                    print(getBoardCopy(board_values))
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:  # Left mouse button

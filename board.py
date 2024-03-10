@@ -173,3 +173,10 @@ class Board:
         current_children = [new_state_up_tuple, new_state_down_tuple, new_state_right_tuple, new_state_left_tuple]
 
         return current_children
+
+    def board_is_full(self):
+        for row in range(4):
+            for col in range(4):
+                if self.board_values[row][col] == 0:
+                    return False
+        return True
