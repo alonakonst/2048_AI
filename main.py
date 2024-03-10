@@ -1,6 +1,6 @@
 import pygame
 import random
-from mcts import *
+from mcts import MonteCarlo
 from node import Node
 from board import Board
 
@@ -76,7 +76,6 @@ while run:
                 if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
                     board.get_new = True
 
-
             elif event.key == pygame.K_LEFT:
                 board_temp = tuple(map(tuple, board.board_values))  # Convert to tuple for comparison
                 board_values = board.turn_left(board.board_values)
@@ -96,12 +95,13 @@ while run:
             if event.button == 1:  # Left mouse button
                 if button.collidepoint(event.pos):  # Check if the mouse click is within the button
                     button_pressed = True
-                    #mcts_search(1, 2)
                     current_node = Node(board_values)
-                    print(current_node.state)
+
+
                     current_node.children = board.create_children_set()
-                    print(current_node.children)
-                    print(getBoardCopy(board_values))
+                    MonteCarlo.evaluate_states(board.create_children_set())
+
+
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:  # Left mouse button

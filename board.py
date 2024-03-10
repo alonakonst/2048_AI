@@ -156,20 +156,11 @@ class Board:
         board_values_right = [row[:] for row in self.board_values]
         board_values_left = [row[:] for row in self.board_values]
 
-        # Apply different actions to the copies of the board state
-        new_state_up = self.turn_up(board_values_up)
-        new_state_down = self.turn_down(board_values_down)
-        new_state_right = self.turn_right(board_values_right)
-        new_state_left = self.turn_left(board_values_left)
-
-        # Convert each resulting state into a tuple of tuples
-        new_state_up_tuple = tuple(map(tuple, new_state_up))
-        new_state_down_tuple = tuple(map(tuple, new_state_down))
-        new_state_right_tuple = tuple(map(tuple, new_state_right))
-        new_state_left_tuple = tuple(map(tuple, new_state_left))
-
-        # Create a set of resulting states
-        current_children = [new_state_up_tuple, new_state_down_tuple, new_state_right_tuple, new_state_left_tuple]
+        # Create a list of resulting states
+        current_children = [self.turn_up(board_values_up),
+                            self.turn_down(board_values_down),
+                            self.turn_right(board_values_right),
+                            self.turn_left(board_values_left)]
 
         return current_children
 

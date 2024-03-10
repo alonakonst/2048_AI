@@ -1,9 +1,27 @@
-n_simulations = 300
+from node import Node
 
-def getBoardCopy(board):
-    board_copy = [row[:] for row in board]
-    return board_copy
+class MonteCarlo:
+    n_simulations = 300
 
+    @classmethod
+    def getBoardCopy(cls,board):
+        board_copy = [row[:] for row in board]
+        return board_copy
+
+    @classmethod
+    def evaluate_states(cls, children_states):
+        scores = []
+        score = 0
+        for i in children_states:
+            score = 0
+            for row in range(4):
+                for col in range(4):
+                    if i[row][col] > score:
+                        score = i[row][col]
+            scores.append(score)
+        print(scores)
+
+'''
 def perform_action(state, action):
     # Apply action to the game state and return the new state
     # Example: move tiles in the specified direction
@@ -49,3 +67,4 @@ def mcts_search(root_node, num_iterations):
     best_action = select_best_action(root_node)
     print('search completed')
     return best_action
+   '''
