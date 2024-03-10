@@ -42,6 +42,16 @@ game_over = False
 init_count = 0
 key_direction = ''
 
+#definif a button
+button = pygame.Rect(10, 10, 200, 50)
+button_font = pygame.font.Font(font_name, 12)
+button_color_default = colors['bg']
+button_color_pressed = colors[0]
+button_pressed = False
+
+
+
+
 def turn_up(board):
     merged = [[False for _ in range(4)] for _ in range(4)]
     for row in range(4):
@@ -144,6 +154,8 @@ def get_new_tiles(board):
 def draw_board():
     pygame.draw.rect(screen,colors['bg'],[0,screen_height*0.25,screen_width,screen_height*0.75],0,10)
 
+
+
 #draw current pieces on the board
 def draw_pieces(board):
     for i in range(4):
@@ -179,39 +191,41 @@ while run:
         get_new = False
         init_count +=1
 
-    if key_direction == 'UP':
-        board_values = turn_up(board_values)
-        key_direction = ''
-        get_new = True
-
-    if key_direction == 'DOWN':
-        board_values = turn_down(board_values)
-        key_direction = ''
-        get_new = True
-
-    if key_direction == 'RIGHT':
-        board_values = turn_right(board_values)
-        key_direction = ''
-        get_new = True
-
-    if key_direction == 'LEFT':
-        board_values = turn_left(board_values)
-        key_direction = ''
-        get_new = True
-
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_UP:
-                key_direction = 'UP'
+                board_values = turn_up(board_values)
+                key_direction = ''
+                get_new = True
             elif event.key == pygame.K_DOWN:
-                key_direction = 'DOWN'
+                board_values = turn_down(board_values)
+                key_direction = ''
+                get_new = True
             elif event.key == pygame.K_LEFT:
-                key_direction = 'LEFT'
+                board_values = turn_left(board_values)
+                key_direction = ''
+                get_new = True
             elif event.key == pygame.K_RIGHT:
-                key_direction = 'RIGHT'
+                board_values = turn_right(board_values)
+                key_direction = ''
+                get_new = True
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Left mouse button
+                if button.collidepoint(event.pos):  # Check if the mouse click is within the button
+                    button_pressed = True
+                    print('Button pressed')
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:  # Left mouse button
+                button_pressed = False
+
+    button_color = button_color_pressed if button_pressed else button_color_default
+    pygame.draw.rect(screen, button_color, button, border_radius=10)
+    button_text = button_font.render('Press for AI to play', True, (255, 255, 255))  # Render the text
+    text_rect = button_text.get_rect(center=(110, 35))  # Position the text in the center of the button
+    screen.blit(button_text, text_rect)  # Draw the text on th
 
     pygame.display.flip()
 
