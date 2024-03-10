@@ -10,16 +10,22 @@ class MonteCarlo:
 
     @classmethod
     def evaluate_states(cls, children_states):
-        scores = []
         score = 0
+        scores=[]
+        move = children_states[0]
         for i in children_states:
-            score = 0
+            score_i=0
             for row in range(4):
                 for col in range(4):
                     if i[row][col] > score:
-                        score = i[row][col]
-            scores.append(score)
-        print(scores)
+                        score_i = i[row][col]
+                        if score_i > score:
+                            score=score_i
+                            move = i
+
+        print(children_states)
+        print(move)
+        print(score)
 
 '''
 def perform_action(state, action):
