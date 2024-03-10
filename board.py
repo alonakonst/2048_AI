@@ -122,7 +122,6 @@ class Board:
             self.board_values[random_empty_cell[0]][random_empty_cell[1]] = 4
         else:
             self.board_values[random_empty_cell[0]][random_empty_cell[1]] = 2
-        print(random_empty_cell)
         return self.board_values
 
     # draw background for the board
@@ -179,4 +178,15 @@ class Board:
             for col in range(4):
                 if self.board_values[row][col] == 0:
                     return False
+
+        for element in self.create_children_set():
+            if element != self.create_children_set()[0]:
+                return False
+
         return True
+    def winning_condition(self):
+        for row in range(4):
+            for col in range(4):
+                if self.board_values[row][col] == 2048:
+                    return True
+        return False

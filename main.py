@@ -51,10 +51,11 @@ while run:
         board.init_count +=1
 
     if board.board_is_full():
-        #text = font.render('Game over', True, (255, 255, 255))  # Render the text
-        #text_pos = text.get_rect(center=(150, 55))  # Position the text in the center of the button
-        #screen.blit(text, text_pos)
-        print('its full')
+        print('its full, you lost')
+        run = False
+
+    if board.winning_condition():
+        print('you won')
         run = False
 
     for event in pygame.event.get():
