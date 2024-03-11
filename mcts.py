@@ -53,19 +53,18 @@ def simulate(node, board):
     reward = 0
     game_state = node.state
 
-            # Make a random move
-    game_moves = board.create_children_set()
-    move = random.choice(game_moves)
-    apply_move(board, move)
-    print(board.board_values)
-    board.get_new = True
 
-    if board.get_new:
-        board.get_new_tiles()
-        board.get_new = False
+    while not board.game_over():
+        game_moves = board.create_children_set()
+        move = random.choice(game_moves)
+        apply_move(board, move)
+        print(board.board_values)
+        board.get_new = True
+        if board.get_new:
+            board.get_new_tiles()
+            board.get_new = False
 
-    print(board.board_values)
-
+    print('last one', board.board_values)
     '''
     # Evaluate the final state
     if has_won(game_state, node.player):

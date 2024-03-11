@@ -104,9 +104,12 @@ while run:
                     #current_node = Node(board_values)
                     #current_node.children = board.create_children_set()
                     #MonteCarlo.evaluate_states(board.create_children_set())
+                    # mcts_search(node, board, 100)
+
+                    node = Node(board.board_values)
+                    simulate(node, board)
 
 
-                    #mcts_search(node, board, 100)
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -115,6 +118,7 @@ while run:
 
 
             # Calculate time difference for this iteration
+    '''
     dt = clock.tick(60) / 1000
     # Update the timer
     time -= dt
@@ -123,7 +127,7 @@ while run:
         time = 0.5
         node = Node(board.board_values)
         simulate(node, board)
-
+    '''
 
 
 
