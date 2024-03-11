@@ -10,37 +10,26 @@ def getBoardCopy(cls,board):
     return board_copy
 
 
-def evaluate_states(cls, children_states):
-    score = 0
-    scores=[]
-    move = children_states[0]
-    for i in children_states:
-        score_i=0
-        for row in range(4):
-            for col in range(4):
-                if i[row][col] > score:
-                    score_i = i[row][col]
-                    if score_i > score:
-                        score=score_i
-                        move = i
 
 
-def perform_action(state, action):
-    # Apply action to the game state and return the new state
-    # Example: move tiles in the specified direction
-    new_state = state.copy()  # Make a copy of the state
-    # Apply the action to new_state
-    return new_state
 
 def select_action(node):
-    # Use selection strategy (e.g., UCB1) to select an action from the node's children
+    best_action = None
+    best_ucb_value = float('-inf')
+
+    for child in node.children:
+        exploitation_term = child.reward / child.visits if child.visits > 0 else 0
+        exploration_term = math.sqrt(math.log(node.visits) / child.visits) if child.visits > 0 else float('inf')
+        ucb_value = exploitation_term + exploration_constant * exploration_term
+
+        if ucb_value > best_ucb_value:
+            best_ucb_value = ucb_value
+            best_action = child
+
+    return best_action
     pass
 
-def expand_node(node):
-    # Expand the node by adding child nodes for all possible actions
-    for action in legal_actions(node.state):
-        child_state = perform_action(node.state, action)
-        node.children[action] = Node(child_state)
+
 
 
 def apply_move(board, move):
@@ -48,33 +37,33 @@ def apply_move(board, move):
 
     return board.board_values
 
+def expand_node(node):
+    # Generate child nodes for possible actions from the current state
+    possible_actions = generate_possible_actions(node.state)
+    for action in possible_actions:
+        new_state = apply_action(node.state, action)  # Apply the action to the current state to obtain the new state
+        child_node = Node(new_state, parent=node)    # Create a child node with the new state
+        node.children.append(child_node)             # Add the child node to the parent's list of children
+
 
 def simulate(node, board):
     reward = 0
     game_state = node.state
-
-
     while not board.game_over():
         game_moves = board.create_children_set()
         move = random.choice(game_moves)
         apply_move(board, move)
-        print(board.board_values)
+        total_sum = 0
+        for row in range(4):
+            for col in range(4):
+                total_sum += board.board_values[row][col]
+                if total_sum>reward:
+                    reward=total_sum
         board.get_new = True
         if board.get_new:
             board.get_new_tiles()
             board.get_new = False
-
-    print('last one', board.board_values)
-    '''
-    # Evaluate the final state
-    if has_won(game_state, node.player):
-        reward = 1  # Player wins
-    elif has_won(game_state, get_opponent(node.player)):
-        reward = -1  # Opponent wins
-    else:
-        reward = 0  # Draw
-    
-    '''
+    print(reward)
     return reward
 
 
@@ -85,32 +74,27 @@ def backpropagate(node, reward):
         node.reward += reward
         node = node.parent
 
-def mcts_search(root_node,board,num_iterations):
-    for _ in range(num_iterations):
-        node = root_node
-        node.children = board.create_children_set()
-        if not board.board_is_full():
-            print(node.children)
-        if node.children:
-            print('there are')
+    def mcts_search(root_node, num_iterations,board):
+        for _ in range(num_iterations):
+            node = root_node
+            node.children = board.create_children_set()
+            # Selection phase: Traverse down the tree until a leaf node is reached
+            while node.children:
+                # Implement selection strategy (e.g., UCB1)
+                node = select_action(node)
 
-
-'''
-def mcts_search(root_node, num_iterations):
-    for _ in range(num_iterations):
-        node = root_node
-        while not board.board_is_full(node):
+            # Expansion phase: Expand the selected node if it's not a terminal state
             if node.children:
-                action = select_action(node)
-                node = node.children[action]
-            else:
                 expand_node(node)
-                action = select_action(node)
-                node = node.children[action]
-        reward = simulate(node)
-        backpropagate(node, reward)
-    # Select the best action based on visit counts or other criteria
-    best_action = select_best_action(root_node)
-    print('search completed')
-    return best_action
-'''
+
+            # Simulation phase: Simulate a random game from the selected node
+            reward = simulate(node)
+
+            # Backpropagation phase: Update statistics of nodes back to the root
+            backpropagate(node, reward)
+
+        # Select the best action based on visit counts or other criteria
+        best_action = select_best_action(root_node)
+        print('Search completed')
+        return best_action
+

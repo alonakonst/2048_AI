@@ -1,9 +1,10 @@
 
 class Node:
-    def __init__(self, state):
-        self.state = state  # Game state (2D array)
-        self.visit_count = 0
+    def __init__(self, state, parent=None):
+        self.state = state
+        self.parent = parent
+        self.children = []
+        self.visits = 0
         self.reward = 0
-        self.children = []  # Map of actions to child nodes
 
 
