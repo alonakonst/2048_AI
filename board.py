@@ -6,7 +6,6 @@ class Board:
     def __init__(self):
         self.board_values = [[0 for _ in range(4)] for _ in range(4)]
         self.get_new = True
-        self.game_over = False
         self.init_count = 0
         self.key_direction = ''
 
@@ -113,10 +112,11 @@ class Board:
             for col in range(4):
                 if self.board_values[row][col] == 0:
                     empty_cells.append((row, col))
-        random_empty_cell = random.choice(empty_cells)
 
         if len(empty_cells) == 0:
-            self.game_over = True
+            return self.board_values
+
+        random_empty_cell = random.choice(empty_cells)
 
         if random.randint(1, 10) == 10:
             self.board_values[random_empty_cell[0]][random_empty_cell[1]] = 4
@@ -180,4 +180,10 @@ class Board:
             for col in range(4):
                 if self.board_values[row][col] == 2048:
                     return True
+        return False
+
+    def game_over(self):
+        if self.winning_condition() or self.board_is_full():
+            return True
+
         return False

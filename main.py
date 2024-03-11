@@ -1,9 +1,10 @@
 import pygame
 import random
-from mcts import MonteCarlo
+from mcts import mcts_search,simulate
 from node import Node
 from board import Board
 
+clock = pygame.time.Clock()
 pygame.init()
 
 #initial setup: screen size, game caption, predetermined speed, font size
@@ -21,6 +22,7 @@ font = pygame.font.Font(font_name, font_size)
 
 
 board = Board()
+time = 2
 
 #define a button
 button = pygame.Rect(10, 10, 200, 50)
@@ -56,6 +58,10 @@ while run:
 
     if board.winning_condition():
         print('you won')
+        run = False
+
+    if board.game_over():
+        print('Game over')
         run = False
 
     for event in pygame.event.get():
@@ -95,17 +101,31 @@ while run:
             if event.button == 1:  # Left mouse button
                 if button.collidepoint(event.pos):  # Check if the mouse click is within the button
                     button_pressed = True
-                    current_node = Node(board_values)
+                    #current_node = Node(board_values)
+                    #current_node.children = board.create_children_set()
+                    #MonteCarlo.evaluate_states(board.create_children_set())
 
 
-                    current_node.children = board.create_children_set()
-                    MonteCarlo.evaluate_states(board.create_children_set())
-
+                    #mcts_search(node, board, 100)
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:  # Left mouse button
                 button_pressed = False
+
+
+            # Calculate time difference for this iteration
+    dt = clock.tick(60) / 1000
+    # Update the timer
+    time -= dt
+    if time <= 0:
+        # Reset the timer
+        time = 0.5
+        node = Node(board.board_values)
+        simulate(node, board)
+
+
+
 
     draw_button()
 
