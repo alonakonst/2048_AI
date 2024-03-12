@@ -108,7 +108,7 @@ while run:
 
                     node = Node(board.board_values)
                     #simulate(node, board)
-                    mcts_search(node, 200, board)
+                    print(f' best action is { mcts_search(node, 5, board)}')
 
 
 

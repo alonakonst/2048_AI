@@ -18,7 +18,6 @@ def select_action(node):
             best_ucb_value = ucb_value
             best_action = child
 
-    print(type(best_action))
     return best_action
 
 
@@ -75,7 +74,6 @@ def backpropagate(node, reward):
     while node is not None:
         node.visits += 1
         node.reward += reward
-        print(node.state, node.visits)
         node = node.parent
 
 def initial_children_rewards(node, board_copy):
@@ -90,29 +88,31 @@ def initial_children_rewards(node, board_copy):
 
 
 def mcts_search(root_node, num_iterations, board):
-    print(root_node.state)
+
     board_copy = copy.deepcopy(board)
     initial_children_rewards(root_node, board_copy)
 
-    node = root_node
+    for _ in range(num_iterations):
+        node = root_node
 
-    #strategy to get to a leaf of the tree
-    while node.children:
-        node = select_action(node)
-        board_copy.board_values = apply_move(board_copy, node.state)
-
-
-    #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
-    #It is a chance turn
-    if not node.is_terminal(board_copy) and not node.is_fully_expanded():
-        node=expand_node(node, board_copy)
-        print(node.state)
+        #strategy to get to a leaf of the tree
+        while node.children:
+            node = select_action(node)
+            board_copy.board_values = apply_move(board_copy, node.state)
 
 
-    #print(node.children[0].state)
+        #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
+        #It is a chance turn
+        if not node.is_terminal(board_copy) and not node.is_fully_expanded():
+            node=expand_node(node, board_copy)
+            board_copy.board_values = apply_move(board_copy, node.state)
 
+        reward = simulate(node, board_copy)
+        # Backpropagation phase: Update statistics of nodes back to the root
+        backpropagate(node, reward)
+        # Select the best action based on visit counts or other criteria
 
-    # reward = simulate(node)
+    best_action = select_action(root_node)
 
-    #print(node.state)
-    #return best_action
+    return best_action.state
+
