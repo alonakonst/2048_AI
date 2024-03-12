@@ -1,6 +1,6 @@
 import pygame
 import random
-from mcts import simulate
+from mcts import *
 from node import Node
 from board import Board
 
@@ -107,7 +107,8 @@ while run:
                     # mcts_search(node, board, 100)
 
                     node = Node(board.board_values)
-                    simulate(node, board)
+                    #simulate(node, board)
+                    mcts_search(node, 200, board)
 
 
 

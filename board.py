@@ -149,7 +149,7 @@ class Board:
                     text_rect = value_text.get_rect(center=(j * 70 + 48.125, (screen_height * 0.25) + i * 70 + 48.125))
                     screen.blit(value_text, text_rect)
 
-    def create_children_set(self):
+    def generate_move_options(self):
         # Create copies of the current board state
         board_values_up = [row[:] for row in self.board_values]
         board_values_down = [row[:] for row in self.board_values]
@@ -157,12 +157,12 @@ class Board:
         board_values_left = [row[:] for row in self.board_values]
 
         # Create a list of resulting states
-        current_children = [self.turn_up(board_values_up),
+        current_options = [self.turn_up(board_values_up),
                             self.turn_down(board_values_down),
                             self.turn_right(board_values_right),
                             self.turn_left(board_values_left)]
 
-        return current_children
+        return current_options
 
     def board_is_full(self):
         for row in range(4):
@@ -170,8 +170,8 @@ class Board:
                 if self.board_values[row][col] == 0:
                     return False
 
-        for element in self.create_children_set():
-            if element != self.create_children_set()[0]:
+        for element in self.generate_move_options():
+            if element != self.generate_move_options()[0]:
                 return False
 
         return True
@@ -185,5 +185,4 @@ class Board:
     def game_over(self):
         if self.winning_condition() or self.board_is_full():
             return True
-
         return False

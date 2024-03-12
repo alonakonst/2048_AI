@@ -2,7 +2,8 @@ import random
 import time
 import pygame
 import copy
-
+from node import Node
+import math
 
 def select_action(node):
     best_action = None
@@ -10,8 +11,8 @@ def select_action(node):
 
     for child in node.children:
         exploitation_term = child.reward / child.visits if child.visits > 0 else 0
-        exploration_term = math.sqrt(math.log(node.visits) / child.visits) if child.visits > 0 else float('inf')
-        ucb_value = exploitation_term + exploration_constant * exploration_term
+        exploration_term = math.sqrt(2*(math.log(node.visits)) / child.visits) if child.visits > 0 else float('inf')
+        ucb_value = exploitation_term +  exploration_term
 
         if ucb_value > best_ucb_value:
             best_ucb_value = ucb_value
@@ -25,20 +26,20 @@ def apply_move(board, move):
 
     return board.board_values
 
-def expand_node(node):
-    # Generate child nodes for possible actions from the current state
-    possible_actions = generate_possible_actions(node.state)
-    for action in possible_actions:
-        new_state = apply_action(node.state, action)  # Apply the action to the current state to obtain the new state
-        child_node = Node(new_state, parent=node)    # Create a child node with the new state
-        node.children.append(child_node)             # Add the child node to the parent's list of children
+def expand_node(node, board):
+
+    for i in board.generate_move_options():
+        i = Node(i, parent=node)
+        node.add_child(i)
+
+    return node
 
 def simulate(node, board):
     board_copy = copy.deepcopy(board)
     reward = 0
     game_state = node.state
     while not board_copy.game_over():
-        game_moves = board_copy.create_children_set()
+        game_moves = board_copy.generate_move_options()
         move = random.choice(game_moves)
         apply_move(board_copy, move)
         total_sum = 0
@@ -51,7 +52,6 @@ def simulate(node, board):
         if board_copy.get_new:
             board_copy.get_new_tiles()
             board_copy.get_new = False
-    print(reward)
     return reward
 
 
@@ -62,24 +62,39 @@ def backpropagate(node, reward):
         node.reward += reward
         node = node.parent
 
-    def mcts_search(root_node, num_iterations, board):
-        board_copy = copy.deepcopy(board)
-        for _ in range(num_iterations):
-            node = root_node
-            node.children = board_copy.create_children_set()
-            # Selection phase: Traverse down the tree until a leaf node is reached
-            while node.children:
-                # Implement selection strategy (e.g., UCB1)
-                node = select_action(node)
-            # Expansion phase: Expand the selected node if it's not a terminal state
-            if node.children:
-                expand_node(node)
-            # Simulation phase: Simulate a random game from the selected node
-            reward = simulate(node)
-            # Backpropagation phase: Update statistics of nodes back to the root
-            backpropagate(node, reward)
-        # Select the best action based on visit counts or other criteria
-        best_action = select_action(root_node)
-        print('best_action')
-        return best_action
+def initial_children_rewards(node, board_copy):
+    rewards = []
+    for i in board_copy.generate_move_options():
+        i = Node(i, parent = node)
+        node.add_child(i)
+    for child in node.children:
+        child.reward = simulate(child, board_copy)
+        child.visits += 1
+        node.visits += 1
 
+
+def mcts_search(root_node, num_iterations, board):
+    board_copy = copy.deepcopy(board)
+    initial_children_rewards(root_node, board_copy)
+
+    node = root_node
+
+    #strategy to get to a leaf of the tree
+    while node.children:
+        node = select_action(node)
+        board_copy.board_values = apply_move(board_copy, node.state)
+        print(node.state, node.reward)
+
+    #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
+    #It is a chance turn
+    if not node.is_terminal(board_copy) and not node.is_fully_expanded():
+        node=expand_node(node, board_copy)
+
+
+    #print(node.children[0].state)
+
+
+    # reward = simulate(node)
+
+    #print(node.state)
+    #return best_action
