@@ -101,14 +101,7 @@ while run:
             if event.button == 1:  # Left mouse button
                 if button.collidepoint(event.pos):  # Check if the mouse click is within the button
                     button_pressed = True
-                    #current_node = Node(board_values)
-                    #current_node.children = board.create_children_set()
-                    #MonteCarlo.evaluate_states(board.create_children_set())
-                    # mcts_search(node, board, 100)
 
-                    node = Node(board.board_values)
-                    #simulate(node, board)
-                    print(f' best action is { mcts_search(node, 5, board)}')
 
 
 
@@ -119,16 +112,21 @@ while run:
 
 
             # Calculate time difference for this iteration
-    '''
+
+
     dt = clock.tick(60) / 1000
     # Update the timer
     time -= dt
     if time <= 0:
         # Reset the timer
-        time = 0.5
+        time = 0.2
         node = Node(board.board_values)
-        simulate(node, board)
-    '''
+        board = mcts_search(node, 5, board)
+
+        board.get_new = True
+        if board.get_new:
+            board.get_new_tiles()
+            board.get_new = False
 
 
 

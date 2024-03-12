@@ -24,7 +24,7 @@ def select_action(node):
 def apply_move(board, move):
     board.board_values = move
 
-    return board.board_values
+    return board
 
 def expand_node(node, board):
     root_node = node
@@ -55,7 +55,7 @@ def simulate(node, board):
     while not board_copy.game_over():
         game_moves = board_copy.generate_move_options_user()
         move = random.choice(game_moves)
-        apply_move(board_copy, move)
+        board_copy=apply_move(board_copy, move)
         total_sum = 0
         for row in range(4):
             for col in range(4):
@@ -95,24 +95,26 @@ def mcts_search(root_node, num_iterations, board):
     for _ in range(num_iterations):
         node = root_node
 
-        #strategy to get to a leaf of the tree
-        while node.children:
-            node = select_action(node)
-            board_copy.board_values = apply_move(board_copy, node.state)
+        while not board_copy.game_over:
+            #strategy to get to a leaf of the tree
+            while node.children:
+                node = select_action(node)
+                board_copy = apply_move(board_copy, node.state)
 
+            #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
+            #It is a chance turn
+            if not node.is_terminal(board_copy) and not node.is_fully_expanded():
+                node=expand_node(node, board_copy)
+                board_copy = apply_move(board_copy, node.state)
 
-        #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
-        #It is a chance turn
-        if not node.is_terminal(board_copy) and not node.is_fully_expanded():
-            node=expand_node(node, board_copy)
-            board_copy.board_values = apply_move(board_copy, node.state)
-
-        reward = simulate(node, board_copy)
-        # Backpropagation phase: Update statistics of nodes back to the root
-        backpropagate(node, reward)
-        # Select the best action based on visit counts or other criteria
+            reward = simulate(node, board_copy)
+            # Backpropagation phase: Update statistics of nodes back to the root
+            backpropagate(node, reward)
+            # Select the best action based on visit counts or other criteria
 
     best_action = select_action(root_node)
 
-    return best_action.state
+    board_copy = apply_move(board_copy, best_action.state)
+
+    return board_copy
 
