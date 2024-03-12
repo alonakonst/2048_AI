@@ -124,6 +124,17 @@ class Board:
             self.board_values[random_empty_cell[0]][random_empty_cell[1]] = 2
         return self.board_values
 
+    def generate_move_options_chance(self):
+        for row in range(4):
+            for col in range(4):
+                if self.board_values[row][col] == 0:
+                    empty_cells.append((row, col))
+
+        if len(empty_cells) == 0:
+            return self.board_values
+
+
+
     # draw background for the board
     def draw_board(self, screen, screen_width, screen_height):
         pygame.draw.rect(screen, self.colors['bg'], [0, screen_height * 0.25, screen_width, screen_height * 0.75], 0, 10)
@@ -149,7 +160,7 @@ class Board:
                     text_rect = value_text.get_rect(center=(j * 70 + 48.125, (screen_height * 0.25) + i * 70 + 48.125))
                     screen.blit(value_text, text_rect)
 
-    def generate_move_options(self):
+    def generate_move_options_user(self):
         # Create copies of the current board state
         board_values_up = [row[:] for row in self.board_values]
         board_values_down = [row[:] for row in self.board_values]
@@ -170,8 +181,8 @@ class Board:
                 if self.board_values[row][col] == 0:
                     return False
 
-        for element in self.generate_move_options():
-            if element != self.generate_move_options()[0]:
+        for element in self.generate_move_options_user():
+            if element != self.generate_move_options_user()[0]:
                 return False
 
         return True
