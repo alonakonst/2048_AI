@@ -1,6 +1,6 @@
 import pygame
 import random
-from mcts import mcts_search,simulate
+from mcts import simulate
 from node import Node
 from board import Board
 

@@ -1,16 +1,7 @@
 import random
 import time
 import pygame
-
-
-clock = pygame.time.Clock()
-def getBoardCopy(cls,board):
-    board_copy = [row[:] for row in board]
-    print(board_copy)
-    return board_copy
-
-
-
+import copy
 
 
 def select_action(node):
@@ -27,9 +18,6 @@ def select_action(node):
             best_action = child
 
     return best_action
-    pass
-
-
 
 
 def apply_move(board, move):
@@ -45,24 +33,24 @@ def expand_node(node):
         child_node = Node(new_state, parent=node)    # Create a child node with the new state
         node.children.append(child_node)             # Add the child node to the parent's list of children
 
-
 def simulate(node, board):
+    board_copy = copy.deepcopy(board)
     reward = 0
     game_state = node.state
-    while not board.game_over():
-        game_moves = board.create_children_set()
+    while not board_copy.game_over():
+        game_moves = board_copy.create_children_set()
         move = random.choice(game_moves)
-        apply_move(board, move)
+        apply_move(board_copy, move)
         total_sum = 0
         for row in range(4):
             for col in range(4):
-                total_sum += board.board_values[row][col]
+                total_sum += board_copy.board_values[row][col]
                 if total_sum>reward:
                     reward=total_sum
-        board.get_new = True
-        if board.get_new:
-            board.get_new_tiles()
-            board.get_new = False
+        board_copy.get_new = True
+        if board_copy.get_new:
+            board_copy.get_new_tiles()
+            board_copy.get_new = False
     print(reward)
     return reward
 
@@ -74,27 +62,24 @@ def backpropagate(node, reward):
         node.reward += reward
         node = node.parent
 
-    def mcts_search(root_node, num_iterations,board):
+    def mcts_search(root_node, num_iterations, board):
+        board_copy = copy.deepcopy(board)
         for _ in range(num_iterations):
             node = root_node
-            node.children = board.create_children_set()
+            node.children = board_copy.create_children_set()
             # Selection phase: Traverse down the tree until a leaf node is reached
             while node.children:
                 # Implement selection strategy (e.g., UCB1)
                 node = select_action(node)
-
             # Expansion phase: Expand the selected node if it's not a terminal state
             if node.children:
                 expand_node(node)
-
             # Simulation phase: Simulate a random game from the selected node
             reward = simulate(node)
-
             # Backpropagation phase: Update statistics of nodes back to the root
             backpropagate(node, reward)
-
         # Select the best action based on visit counts or other criteria
-        best_action = select_best_action(root_node)
-        print('Search completed')
+        best_action = select_action(root_node)
+        print('best_action')
         return best_action
 
