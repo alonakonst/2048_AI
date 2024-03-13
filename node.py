@@ -7,6 +7,7 @@ class Node:
         self.children = []
         self.visits = 0
         self.reward = 0
+        self.heuristic_score = 0
 
     def add_child(self, child_node):
         child_node.parent = self
