@@ -4,6 +4,7 @@ import pygame
 import copy
 from node import Node
 import math
+from reward import *
 
 def select_action(node):
     best_action = None
@@ -27,7 +28,7 @@ def apply_move(board, move):
     return board
 
 def expand_node(node, board):
-    root_node = node
+    all_chidren = []
     for row in range(4):
         for col in range(4):
             if board.board_values[row][col] == 0:
@@ -38,14 +39,16 @@ def expand_node(node, board):
                     board_copy.board_values[row][col] = 2
 
                 child = Node(board_copy.board_values, parent=node)
-                node.add_child(child)
-                reward = simulate(child, board_copy)
+                all_chidren.append(child)
 
+    random_child = random.choice(all_chidren)
 
-                backpropagate(child, reward)
+    node.add_child(random_child)
+    reward = simulate(random_child, board_copy)
 
-    best_child = select_action(node)
-    return best_child
+    backpropagate(random_child, reward)
+
+    return random_child
 
 
 def simulate(node, board):
@@ -56,17 +59,15 @@ def simulate(node, board):
         game_moves = board_copy.generate_move_options_user()
         move = random.choice(game_moves)
         board_copy=apply_move(board_copy, move)
-        total_sum = 0
-        for row in range(4):
-            for col in range(4):
-                total_sum += board_copy.board_values[row][col]
-                if total_sum>reward:
-                    reward=total_sum
+        reward = calculate_reward(board_copy.board_values)
         board_copy.get_new = True
+
         if board_copy.get_new:
             board_copy.get_new_tiles()
             board_copy.get_new = False
     return reward
+
+
 
 
 def backpropagate(node, reward):

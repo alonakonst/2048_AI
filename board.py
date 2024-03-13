@@ -50,7 +50,7 @@ class Board:
 
     def turn_down(self,board_values):
         merged = [[False for _ in range(4)] for _ in range(4)]
-        for row in range(3):
+        for row in range(4):
             for col in range(4):
                 shift = 0
                 for element in range(row + 1):

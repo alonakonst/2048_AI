@@ -65,9 +65,12 @@ while run:
         run = False
 
     for event in pygame.event.get():
+
         if event.type == pygame.QUIT:
             run = False
+
         if event.type == pygame.KEYUP:
+
             if event.key == pygame.K_UP:
                 board_temp = tuple(map(tuple, board.board_values))  # Convert to tuple for comparison
                 board_values = board.turn_up(board.board_values)
@@ -120,8 +123,8 @@ while run:
     if time <= 0:
         # Reset the timer
         time = 0.2
-        node = Node(board.board_values)
-        board = mcts_search(node, 5, board)
+        #maybe it doesnt have to create a node tree each time
+        board = mcts_search(Node(board.board_values), 900, board)
 
         board.get_new = True
         if board.get_new:
