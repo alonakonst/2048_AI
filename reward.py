@@ -1,3 +1,4 @@
+import copy
 def calculate_reward(board):
     reward = 0
     max_value=0
@@ -5,6 +6,7 @@ def calculate_reward(board):
     count_of_four = 0
     count_of_zero = 0
     count_of_max = 0
+
 
     for row in range(4):
         for col in range(4):
@@ -51,23 +53,23 @@ def calculate_reward(board):
 
 
     return reward
-
-
+    
+'''
 def monoticity_calculation(sequence):
 
 
-    if all(sequence[i] > sequence[i + 1] for i in range(len(sequence) - 1)):
+    if all(sequence[i] >= sequence[i + 1] for i in range(len(sequence) - 1)):
         return 10  # Increasing monotonicity
-    elif all(sequence[i] > sequence[i + 1] for i in range(len(sequence) - 1)):
+    elif all(sequence[i] <= sequence[i + 1] for i in range(len(sequence) - 1)):
         return 10  # Decreasing monotonicity
-    elif sequence[0] > sequence[1] > sequence[2]:
-        return 8
-    elif sequence[3] > sequence[2] > sequence[1]:
-        return 8
-    elif sequence[0] >= sequence[1]:
-        return 5
-    elif sequence[3] >= sequence[2]:
-        return 5
 
     else:
         return 0
+
+def list_moniticity(sequence, increasing):
+    if increasing:
+        return all(sequence[i] > sequence[i + 1] for i in range(len(sequence) - 1))
+    else:
+        return all(sequence[i] < sequence[i + 1] for i in range(len(sequence) - 1))
+    
+'''

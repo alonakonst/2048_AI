@@ -1,5 +1,6 @@
 import pygame
 import random
+import copy
 
 
 class Board:
@@ -8,6 +9,7 @@ class Board:
         self.get_new = True
         self.init_count = 0
         self.key_direction = ''
+        self.score = 0
 
         # 2048 game colour library (taking from this tutorial: https://www.youtube.com/watch?v=rp9s1O3iSEQ)
         self.colors = {0: (204, 192, 179),
@@ -43,14 +45,16 @@ class Board:
                     if board_values[row - shift - 1][col] == board_values[row - shift][col] and not merged[row - shift][col] \
                             and not merged[row - shift - 1][col]:
                         board_values[row - shift - 1][col] *= 2
+                        self.score += board_values[row - shift - 1][col]
                         board_values[row - shift][col] = 0
                         merged[row - shift - 1][col] = True
+
 
         return board_values
 
     def turn_down(self,board_values):
         merged = [[False for _ in range(4)] for _ in range(4)]
-        for row in range(4):
+        for row in range(3):
             for col in range(4):
                 shift = 0
                 for element in range(row + 1):
@@ -63,8 +67,10 @@ class Board:
                     if board_values[2 - row + shift][col] == board_values[3 - row + shift][col] and not merged[3 - row + shift][col] \
                             and not merged[2 - row + shift][col]:
                         board_values[3 - row + shift][col] *= 2
+                        self.score += board_values[3 - row + shift][col]
                         board_values[2 - row + shift][col] = 0
                         merged[3 - row + shift][col] = True
+
         return board_values
 
     def turn_right(self, board_values):
@@ -82,8 +88,10 @@ class Board:
                     if board_values[row][4 - col + shift] == board_values[row][3 - col + shift] and not merged[row][4 - col + shift] \
                             and not merged[row][3 - col + shift]:
                         board_values[row][4 - col + shift] *= 2
+                        self.score += board_values[row][4 - col + shift]
                         board_values[row][3 - col + shift] = 0
                         merged[row][4 - col + shift] = True
+
         return board_values
 
     def turn_left(self, board_values):
@@ -100,6 +108,7 @@ class Board:
                 if board_values[row][col - shift] == board_values[row][col - shift - 1] and not merged[row][col - shift - 1] \
                         and not merged[row][col - shift]:
                     board_values[row][col - shift - 1] *= 2
+                    self.score += board_values[row][col - shift - 1]
                     board_values[row][col - shift] = 0
                     merged[row][col - shift - 1] = True
 
@@ -162,16 +171,16 @@ class Board:
 
     def generate_move_options_user(self):
         # Create copies of the current board state
-        board_values_up = [row[:] for row in self.board_values]
-        board_values_down = [row[:] for row in self.board_values]
-        board_values_right = [row[:] for row in self.board_values]
-        board_values_left = [row[:] for row in self.board_values]
+        board_up = copy.deepcopy(self)
+        board_down = copy.deepcopy(self)
+        board_right = copy.deepcopy(self)
+        board_left = copy.deepcopy(self)
 
         # Create a list of resulting states
-        current_options = [self.turn_up(board_values_up),
-                            self.turn_down(board_values_down),
-                            self.turn_right(board_values_right),
-                            self.turn_left(board_values_left)]
+        current_options = [(board_up.turn_up(board_up.board_values), board_up.score),
+                            (board_down.turn_down(board_down.board_values), board_down.score),
+                            (board_right.turn_right(board_right.board_values),board_right.score),
+                            (board_left.turn_left(board_left.board_values),board_left.score)]
 
         return current_options
 

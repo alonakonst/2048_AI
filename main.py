@@ -56,12 +56,14 @@ while run:
         print('its full, you lost')
 
 
+
     if board.winning_condition():
         print('you won')
         run = False
 
     if board.game_over():
         print('Game over')
+        print("Game final score:", board.score)
 
 
     for event in pygame.event.get():
@@ -124,13 +126,12 @@ while run:
         # Reset the timer
         time = 0.2
         #maybe it doesnt have to create a node tree each time
-        board = mcts_search(Node(board.board_values), 1500, board)
+        board = mcts_search(Node(board.board_values,score=board.score), 0, board)
 
         board.get_new = True
         if board.get_new:
             board.get_new_tiles()
             board.get_new = False
-
 
 
     draw_button()

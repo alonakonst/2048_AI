@@ -1,13 +1,14 @@
 
 
 class Node:
-    def __init__(self, state, parent=None):
+    def __init__(self, state, parent=None, score=0):
         self.state = state
         self.parent = parent
         self.children = []
         self.visits = 0
         self.reward = 0
         self.heuristic_score = 0
+        self.score = score
 
     def add_child(self, child_node):
         child_node.parent = self

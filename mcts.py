@@ -6,6 +6,7 @@ from node import Node
 import math
 from reward import *
 
+
 def select_action(node):
     best_action = None
     best_ucb_value = float('-inf')
@@ -13,7 +14,7 @@ def select_action(node):
     for child in node.children:
         exploitation_term = child.reward / child.visits if child.visits > 0 else 0
         exploration_term = math.sqrt(2*(math.log(node.visits)) / child.visits) if child.visits > 0 else float('inf')
-        ucb_value = exploitation_term +  exploration_term + child.heuristic_score
+        ucb_value = exploitation_term +  exploration_term
 
         if ucb_value > best_ucb_value:
             best_ucb_value = ucb_value
@@ -22,8 +23,13 @@ def select_action(node):
     return best_action
 
 
-def apply_move(board, move):
-    board.board_values = move
+def apply_move(board, node, score):
+    if type(node)==list:
+        board.board_values = node
+    else:
+        board.board_values = node.state
+
+    board.score = score
 
     return board
 
@@ -38,7 +44,7 @@ def expand_node(node, board):
                 else:
                     board_copy.board_values[row][col] = 2
 
-                child = Node(board_copy.board_values, parent=node)
+                child = Node(board_copy.board_values, parent=node, score = node.score)
                 all_chidren.append(child)
 
     random_child = random.choice(all_chidren)
@@ -56,18 +62,17 @@ def simulate(node, board):
     reward = 0
     game_state = node.state
     while not board_copy.game_over():
-        game_moves = board_copy.generate_move_options_user()
-        move = random.choice(game_moves)
-        board_copy=apply_move(board_copy, move)
+        move = random.choice(board_copy.generate_move_options_user())
+        board_copy=apply_move(board_copy, move[0], move[1])
         reward = calculate_reward(board_copy.board_values)
         board_copy.get_new = True
 
         if board_copy.get_new:
             board_copy.get_new_tiles()
             board_copy.get_new = False
+
+
     return reward
-
-
 
 
 def backpropagate(node, reward):
@@ -77,22 +82,20 @@ def backpropagate(node, reward):
         node.reward += reward
         node = node.parent
 
-def children_heuristics(node, board_copy):
-
-    for i in board_copy.generate_move_options_user():
-        i = Node(i, parent = node)
-        node.add_child(i)
-    for child in node.children:
-        child.heuristic_score = heuristic(child.state)
 
 def initial_children_rewards(node, board_copy):
 
+    for move, score_num in board_copy.generate_move_options_user():
+        move = Node(move, parent=node, score=score_num)
+        node.add_child(move)
+
     for child in node.children:
-        child.reward = heuristic(child.state)
+        child.reward = simulate(child, board_copy)
         child.visits += 1
         node.visits += 1
 
-def heuristic(board):
+
+def heuristic(board,score):
     heuristic_score = 0
     #heuristic has 5 components, each has max weight of 10, so max heuristic value is 50
 
@@ -102,6 +105,7 @@ def heuristic(board):
     count_of_3rd_max = 0
     count_of_zero = 0
 
+    '''
     for row in range(4):
         for col in range(4):
             if board[row][col]==max_value:
@@ -111,53 +115,60 @@ def heuristic(board):
                 max_value=board[row][col]
     #first component is max value, closer to 2048 is better
     heuristic_score += max_value/10
+    '''
 
     #second component is location of max value, if it is in the corner, heuristic score is plus 10, is it is in outside
     #row or column, it  is 5, otherwise it is 0
-    if board[3][3] or board[0][0] or board[0][3] or board[3][0] == max_value:
-        heuristic_score += 50
+    #if board[3][3] or board[0][0] or board[0][3] or board[3][0] == max_value:
+     #   heuristic_score +=
 
-    elif board[1][1] or board[1][2] or board[2][1] or board[2][2] == max_value:
-        heuristic_score -= 50
+    #elif board[1][1] or board[1][2] or board[2][1] or board[2][2] == max_value:
+     #   heuristic_score -=
 
-    else: heuristic_score += -25
+    #else: heuristic_score += -25
+
+    #heuristic_score += math.sqrt(score)
 
 
-
-    #third component is monoticity, increasing and decreasing of outside columns and rows
-    monoticity_row_zero = monoticity_calculation(board[0])
-    monoticity_row_three = monoticity_calculation(board[3])
-    monoticity_col_zero = monoticity_calculation([row[0] for row in board])
-    monoticity_col_four = monoticity_calculation([row[3] for row in board])
-    heuristic_score += max(monoticity_row_zero, monoticity_row_three, monoticity_col_zero, monoticity_col_four)
 
 
     count_of_small = 0
     #fourth component is concentration of second and third best components
-    for row in range(4):
-        for col in range(4):
-            if board[row][col]==max_value/2:
-                count_of_2nd_max += 1
-            if board[row][col]==max_value/4:
-                count_of_3rd_max += 1
-            if board[row][col] == 0:
-                count_of_zero += 1
-            if board[row][col]== 2 or 4 or 8 or 16 or 32:
-                count_of_small += 1
 
 
-        heuristic_score -= count_of_small*5
 
-
-    heuristic_score = (count_of_2nd_max+count_of_3rd_max)/(17-count_of_zero-count_of_max)*10
+    #heuristic_score = (count_of_2nd_max+count_of_3rd_max)/(17-count_of_zero-count_of_max)*10
 
     #fifth compont: concentration of zeroes:
     heuristic_score += (count_of_zero/16)*10
 
+    heuristic_score += snake_monoticity(board)
+
     return heuristic_score
+
+def snake_monoticity(board):
+    monoticity_count = 0
+    monoticity_scores = [list_moniticity(board[3],False),
+                         list_moniticity(board[2], True),
+                         list_moniticity(board[1], False),
+                         list_moniticity(board[0], True),
+
+                         list_moniticity([row[0] for row in board],False),
+                         list_moniticity([row[1] for row in board], True),
+                         list_moniticity([row[2] for row in board], False),
+                         list_moniticity([row[3] for row in board], True)]
+
+
+    for i in monoticity_scores:
+        if i == True:
+            monoticity_count += 1
+
+
+    return monoticity_count*10
+
+
 def mcts_search(root_node, num_iterations, board):
     board_copy = copy.deepcopy(board)
-    children_heuristics(root_node, board_copy)
     initial_children_rewards(root_node, board_copy)
 
     for _ in range(num_iterations):
@@ -167,13 +178,13 @@ def mcts_search(root_node, num_iterations, board):
             #strategy to get to a leaf of the tree
             while node.children:
                 node = select_action(node)
-                board_copy = apply_move(board_copy, node.state)
+                board_copy = apply_move(board_copy, node, node.score)
 
             #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
             #It is a chance turn
             if not node.is_terminal(board_copy) and not node.is_fully_expanded():
                 node=expand_node(node, board_copy)
-                board_copy = apply_move(board_copy, node.state)
+                board_copy = apply_move(board_copy, node, node.score)
 
             reward = simulate(node, board_copy)
             # Backpropagation phase: Update statistics of nodes back to the root
@@ -182,7 +193,11 @@ def mcts_search(root_node, num_iterations, board):
 
     best_action = select_action(root_node)
 
-    board_copy = apply_move(board_copy, best_action.state)
+    board = apply_move(board_copy, best_action, best_action.score)
 
-    return board_copy
+    board.score = best_action.score
+
+    print('Current score of the board: ', board.score)
+
+    return board
 
