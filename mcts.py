@@ -14,11 +14,11 @@ def select_action(node):
     for child in node.children:
         exploitation_term = child.reward / child.visits if child.visits > 0 else 0
         exploration_term = math.sqrt(2*(math.log(node.visits)) / child.visits) if child.visits > 0 else float('inf')
-        ucb_value = (exploitation_term + exploration_term)*child.heuristic_score if child.heuristic_score>0 else (exploitation_term + exploration_term)
+        ucb_value = child.heuristic_score
 
         if ucb_value > best_ucb_value:
             best_ucb_value = ucb_value
-            print('best ucb value:', best_ucb_value)
+            #print('best ucb value:', best_ucb_value)
             best_action = child
 
     return best_action
@@ -96,79 +96,28 @@ def initial_children_rewards(node, board_copy):
         node.visits += 1
 
 
-def heuristic(board, score, board_score):
+def heuristic(child_state, score, board_score):
     heuristic_score = 0
-    heuristic_score += score-board_score
-    #heuristic has 5 components, each has max weight of 10, so max heuristic value is 50
 
-    #print('heuristic score:', heuristic_score)
-    max_value = 0
-    count_of_max = 0
-    count_of_2nd_max = 0
-    count_of_3rd_max = 0
-    count_of_zero = 0
+    w = [[4 ** 15, 4 ** 14, 4 ** 13, 4 ** 12],
+         [4 ** 8, 4 ** 9, 4 ** 10, 4 ** 11],
+         [4 ** 7, 4 ** 6, 4 ** 5, 4 ** 4],
+         [4 ** 0, 4 ** 1, 4 ** 2, 4 ** 3]]
 
-    '''
-    for row in range(4):
-        for col in range(4):
-            if board[row][col]==max_value:
-                count_of_max += 1
-            if board[row][col]>max_value:
-                count_of_max = 1
-                max_value=board[row][col]
-    #first component is max value, closer to 2048 is better
-    heuristic_score += max_value/10
-    '''
+    eval = 0
 
-    #second component is location of max value, if it is in the corner, heuristic score is plus 10, is it is in outside
-    #row or column, it  is 5, otherwise it is 0
-    #if board[3][3] or board[0][0] or board[0][3] or board[3][0] == max_value:
-     #   heuristic_score +=
+    for i in range(4):
+        for j in range(4):
+            eval += w[i][j] * child_state[i][j]
 
-    #elif board[1][1] or board[1][2] or board[2][1] or board[2][2] == max_value:
-     #   heuristic_score -=
+    #print('eval', eval)
 
-    #else: heuristic_score += -25
-
-    #heuristic_score += math.sqrt(score)
-
-
-
-
-    count_of_small = 0
-    #fourth component is concentration of second and third best components
-
-
-
-    #heuristic_score = (count_of_2nd_max+count_of_3rd_max)/(17-count_of_zero-count_of_max)*10
-
-    #fifth compont: concentration of zeroes:
-    #heuristic_score += (count_of_zero/16)*10
-
-    heuristic_score += snake_monoticity(board)
+    heuristic_score += eval*0.00001*(score-board_score)
 
     return heuristic_score
 
-def snake_monoticity(board):
-    monoticity_count = 0
-    monoticity_scores = [list_moniticity(board[3],False),
-                         list_moniticity(board[2], True),
-                         list_moniticity(board[1], False),
-                         list_moniticity(board[0], True),
-
-                         list_moniticity([row[0] for row in board],False),
-                         list_moniticity([row[1] for row in board], True),
-                         list_moniticity([row[2] for row in board], False),
-                         list_moniticity([row[3] for row in board], True)]
 
 
-    for i in monoticity_scores:
-        if i == True:
-            monoticity_count += 1
-
-    #print('monoticity count:', monoticity_count)
-
-    return monoticity_count*10
 
 def calculate_heuristics_scores(node, board):
 

@@ -53,7 +53,22 @@ def calculate_reward(board):
 
     reward -= (count_of_two+count_of_four)*0.1*board.score
 
-    reward += board.score
+    w = [[4 ** 15, 4 ** 14, 4 ** 13, 4 ** 12],
+         [4 ** 8, 4 ** 9, 4 ** 10, 4 ** 11],
+         [4 ** 7, 4 ** 6, 4 ** 5, 4 ** 4],
+         [4 ** 0, 4 ** 1, 4 ** 2, 4 ** 3]]
+
+    eval = 0
+
+    for i in range(4):
+        for j in range(4):
+            eval += w[i][j] * board.board_values[i][j]
+
+    # print('eval', eval)
+
+
+
+    reward += (board.score * eval * 0.00001)
 
     return reward
     
