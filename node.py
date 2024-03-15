@@ -20,12 +20,21 @@ class Node:
 
         if board.winning_condition():
             return True
+
         return False
 
-    def is_fully_expanded(self):
-        if len(self.children)==4:
-            return True
+    def is_fully_expanded(self, board):
+        choice_children = 0
+        for row in range(4):
+            for col in range(4):
+                if board.board_values[row][col] == 0:
+                    choice_children += 1
+
+        if len(self.children) >= choice_children:
+                return True
+
         return False
+
     def initial_children_rewards(self, board_copy):
         rewards = []
         for i in board_copy.generate_move_options():

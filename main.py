@@ -126,7 +126,7 @@ while run:
         # Reset the timer
         time = 0.2
         #maybe it doesnt have to create a node tree each time
-        board = mcts_search(Node(board.board_values,score=board.score), 0, board)
+        board = mcts_search(Node(board.board_values, score=board.score), 1, board)
 
         board.get_new = True
         if board.get_new:

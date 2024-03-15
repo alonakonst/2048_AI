@@ -14,10 +14,11 @@ def select_action(node):
     for child in node.children:
         exploitation_term = child.reward / child.visits if child.visits > 0 else 0
         exploration_term = math.sqrt(2*(math.log(node.visits)) / child.visits) if child.visits > 0 else float('inf')
-        ucb_value = exploitation_term +  exploration_term
+        ucb_value = (exploitation_term + exploration_term)*child.heuristic_score if child.heuristic_score>0 else (exploitation_term + exploration_term)
 
         if ucb_value > best_ucb_value:
             best_ucb_value = ucb_value
+            print('best ucb value:', best_ucb_value)
             best_action = child
 
     return best_action
@@ -64,7 +65,7 @@ def simulate(node, board):
     while not board_copy.game_over():
         move = random.choice(board_copy.generate_move_options_user())
         board_copy=apply_move(board_copy, move[0], move[1])
-        reward = calculate_reward(board_copy.board_values)
+        reward = calculate_reward(board_copy)
         board_copy.get_new = True
 
         if board_copy.get_new:
@@ -95,10 +96,12 @@ def initial_children_rewards(node, board_copy):
         node.visits += 1
 
 
-def heuristic(board,score):
+def heuristic(board, score, board_score):
     heuristic_score = 0
+    heuristic_score += score-board_score
     #heuristic has 5 components, each has max weight of 10, so max heuristic value is 50
 
+    #print('heuristic score:', heuristic_score)
     max_value = 0
     count_of_max = 0
     count_of_2nd_max = 0
@@ -140,7 +143,7 @@ def heuristic(board,score):
     #heuristic_score = (count_of_2nd_max+count_of_3rd_max)/(17-count_of_zero-count_of_max)*10
 
     #fifth compont: concentration of zeroes:
-    heuristic_score += (count_of_zero/16)*10
+    #heuristic_score += (count_of_zero/16)*10
 
     heuristic_score += snake_monoticity(board)
 
@@ -163,33 +166,49 @@ def snake_monoticity(board):
         if i == True:
             monoticity_count += 1
 
+    #print('monoticity count:', monoticity_count)
 
     return monoticity_count*10
 
+def calculate_heuristics_scores(node, board):
+
+    for child in node.children:
+        child.heuristic_score = heuristic(child.state, child.score, board.score)
+
 
 def mcts_search(root_node, num_iterations, board):
+    if root_node.is_terminal(board):
+        return board
+
     board_copy = copy.deepcopy(board)
     initial_children_rewards(root_node, board_copy)
+    calculate_heuristics_scores(root_node, board_copy)
 
     for _ in range(num_iterations):
+
         node = root_node
 
-        while not board_copy.game_over:
-            #strategy to get to a leaf of the tree
-            while node.children:
-                node = select_action(node)
-                board_copy = apply_move(board_copy, node, node.score)
+        #strategy to get to a leaf of the tree
+        while node.children:
 
-            #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
-            #It is a chance turn
-            if not node.is_terminal(board_copy) and not node.is_fully_expanded():
+
+
+            node = select_action(node)
+            board_copy = apply_move(board_copy, node, node.score)
+
+                #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
+                #It is a chance turn
+            if not node.is_terminal(board_copy) and not node.is_fully_expanded(board_copy):
                 node=expand_node(node, board_copy)
                 board_copy = apply_move(board_copy, node, node.score)
 
-            reward = simulate(node, board_copy)
-            # Backpropagation phase: Update statistics of nodes back to the root
-            backpropagate(node, reward)
-            # Select the best action based on visit counts or other criteria
+                if not node.is_terminal(board_copy):
+
+                    reward = simulate(node, board_copy)
+                    # Backpropagation phase: Update statistics of nodes back to the root
+
+                    backpropagate(node, reward)
+                    # Select the best action based on visit counts or other criteria
 
     best_action = select_action(root_node)
 

@@ -10,17 +10,17 @@ def calculate_reward(board):
 
     for row in range(4):
         for col in range(4):
-            if board[row][col]==max_value:
+            if board.board_values[row][col]==max_value:
                 count_of_max += 1
-            if board[row][col]==2:
+            if board.board_values[row][col]==2:
                 count_of_two += 1
-            if board[row][col]==4:
+            if board.board_values[row][col]==4:
                 count_of_four += 1
-            if board[row][col]==0:
+            if board.board_values[row][col]==0:
                 count_of_zero += 1
-            if board[row][col]>max_value:
+            if board.board_values[row][col]>max_value:
                 count_of_max = 1
-                max_value=board[row][col]
+                max_value=board.board_values[row][col]
 
 
     #most valuable of the reward is max value
@@ -47,14 +47,17 @@ def calculate_reward(board):
     elif max_value == 2:
         reward += 0
 
+
     #another component is concentration of zero:
-    reward += (count_of_zero/(16-count_of_max))*100
+    reward += (count_of_zero/(16-count_of_max))*10
 
+    reward -= (count_of_two+count_of_four)*0.1*board.score
 
+    reward += board.score
 
     return reward
     
-'''
+
 def monoticity_calculation(sequence):
 
 
@@ -72,4 +75,4 @@ def list_moniticity(sequence, increasing):
     else:
         return all(sequence[i] < sequence[i + 1] for i in range(len(sequence) - 1))
     
-'''
+
