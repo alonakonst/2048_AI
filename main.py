@@ -22,6 +22,8 @@ font = pygame.font.Font(font_name, font_size)
 
 
 board = Board()
+node = Node(board.board_values, score=board.score)
+
 time = 2
 
 #define a button
@@ -54,8 +56,13 @@ while run:
 
     if board.board_is_full():
         print('its full, you lost')
+        run = False
 
 
+
+    if board.board_is_full():
+        print('its full, you lost')
+        run = False
 
     if board.winning_condition():
         print('you won')
@@ -64,6 +71,7 @@ while run:
     if board.game_over():
         print('Game over')
         print("Game final score:", board.score)
+
 
 
     for event in pygame.event.get():
@@ -110,7 +118,6 @@ while run:
 
 
 
-
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:  # Left mouse button
                 button_pressed = False
@@ -118,21 +125,24 @@ while run:
 
             # Calculate time difference for this iteration
 
-
     dt = clock.tick(60) / 1000
     # Update the timer
+
+
     time -= dt
     if time <= 0:
         # Reset the timer
         time = 0.2
-        #maybe it doesnt have to create a node tree each time
-        board = mcts_search(Node(board.board_values, score=board.score), 1, board)
+        # maybe it doesnt have to create a node tree each time
+
+        node = mcts_search(node, 5, board)
+
+        board = apply_move(board, node, node.score)
 
         board.get_new = True
         if board.get_new:
             board.get_new_tiles()
             board.get_new = False
-
 
     draw_button()
 
@@ -140,4 +150,3 @@ while run:
 
 
 pygame.quit()
-

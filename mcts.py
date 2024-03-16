@@ -14,7 +14,7 @@ def select_action(node):
     for child in node.children:
         exploitation_term = child.reward / child.visits if child.visits > 0 else 0
         exploration_term = math.sqrt(2*(math.log(node.visits)) / child.visits) if child.visits > 0 else float('inf')
-        ucb_value = child.heuristic_score
+        ucb_value = child.heuristic_score+(exploration_term+exploitation_term)
 
         if ucb_value > best_ucb_value:
             best_ucb_value = ucb_value
@@ -45,7 +45,7 @@ def expand_node(node, board):
                 else:
                     board_copy.board_values[row][col] = 2
 
-                child = Node(board_copy.board_values, parent=node, score = node.score)
+                child = Node(board_copy.board_values, parent=node, score = node.score, heuristic_score=node.heuristic_score)
                 all_chidren.append(child)
 
     random_child = random.choice(all_chidren)
@@ -112,7 +112,7 @@ def heuristic(child_state, score, board_score):
 
     #print('eval', eval)
 
-    heuristic_score += eval*0.00001*(score-board_score)
+    heuristic_score += eval*0.00000001*(score-board_score) if (score-board_score)>0 else eval*0.0000001
 
     return heuristic_score
 
@@ -126,9 +126,7 @@ def calculate_heuristics_scores(node, board):
 
 
 def mcts_search(root_node, num_iterations, board):
-    if root_node.is_terminal(board):
-        return board
-
+    print(root_node.parent)
     board_copy = copy.deepcopy(board)
     initial_children_rewards(root_node, board_copy)
     calculate_heuristics_scores(root_node, board_copy)
@@ -140,32 +138,21 @@ def mcts_search(root_node, num_iterations, board):
         #strategy to get to a leaf of the tree
         while node.children:
 
-
-
             node = select_action(node)
             board_copy = apply_move(board_copy, node, node.score)
 
                 #Expansion phase: Expand the selected node if it's not a terminal state and not fully expanded
                 #It is a chance turn
-            if not node.is_terminal(board_copy) and not node.is_fully_expanded(board_copy):
-                node=expand_node(node, board_copy)
-                board_copy = apply_move(board_copy, node, node.score)
+        if not node.is_terminal(board_copy) and not node.is_fully_expanded(board_copy):
+            node=expand_node(node, board_copy)
+            board_copy = apply_move(board_copy, node, node.score)
 
-                if not node.is_terminal(board_copy):
-
-                    reward = simulate(node, board_copy)
+        reward = simulate(node, board_copy)
                     # Backpropagation phase: Update statistics of nodes back to the root
-
-                    backpropagate(node, reward)
-                    # Select the best action based on visit counts or other criteria
+        backpropagate(node, reward)
+          # Select the best action based on visit counts or other criteria
 
     best_action = select_action(root_node)
 
-    board = apply_move(board_copy, best_action, best_action.score)
 
-    board.score = best_action.score
-
-    print('Current score of the board: ', board.score)
-
-    return board
-
+    return best_action
