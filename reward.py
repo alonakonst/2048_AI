@@ -23,39 +23,25 @@ def calculate_reward(board):
                 max_value=board.board_values[row][col]
 
 
-    #most valuable of the reward is max value
-    if max_value==2048:
-        reward += 30
-    elif max_value==1024:
-        reward += 25
-    elif max_value == 512:
-        reward += 15
-    elif max_value == 256:
-        reward -= 15
-    elif max_value == 128:
-        reward -= 30
-    elif max_value == 64:
-        reward -= 30
-    elif max_value == 32:
-        reward -= 30
-    elif max_value == 16:
-        reward -= 30
-    elif max_value == 8:
-        reward += 0
-    elif max_value == 4:
-        reward += 0
-    elif max_value == 2:
-        reward += 0
 
 
     #another component is concentration of zero:
     reward += (count_of_zero/(16-count_of_max))*10
 
-    reward -= (count_of_two+count_of_four)*0.1*board.score
+
+    w = [[16, 15, 14,13],
+         [9, 10, 11, 12],
+         [8, 7, 6, 5],
+         [1, 2, 3, 4]]
+
+    eval = 0
+
+    for i in range(4):
+        for j in range(4):
+            eval += w[i][j] * board.board_values[i][j]
 
 
-
-    reward += (board.score)
+    reward = (board.score) + eval - (count_of_two+count_of_four)*0.1*board.score + 10002*count_of_zero
 
     return reward
     

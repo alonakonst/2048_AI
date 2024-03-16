@@ -15,10 +15,10 @@ def select_action(node):
         exploitation_term = child.reward / child.visits if child.visits > 0 else 0
         exploration_term = math.sqrt(2*(math.log(node.visits)) / child.visits) if child.visits > 0 else float('inf')
         ucb_value = child.heuristic_score+(exploration_term+exploitation_term)
+        print('child heuristic score:', child.heuristic_score, 'exploitation:', exploitation_term, 'visit:', child.visits)
 
         if ucb_value > best_ucb_value:
             best_ucb_value = ucb_value
-            #print('best ucb value:', best_ucb_value)
             best_action = child
 
     return best_action
@@ -64,7 +64,7 @@ def simulate(node, board):
     game_state = node.state
     while not board_copy.game_over():
         move = random.choice(board_copy.generate_move_options_user())
-        board_copy=apply_move(board_copy, move[0], move[1])
+        board_copy = apply_move(board_copy, move[0], move[1])
         reward = calculate_reward(board_copy)
         board_copy.get_new = True
 
@@ -99,10 +99,10 @@ def initial_children_rewards(node, board_copy):
 def heuristic(child_state, score, board_score):
     heuristic_score = 0
 
-    w = [[4 ** 15, 4 ** 14, 4 ** 13, 4 ** 12],
-         [4 ** 8, 4 ** 9, 4 ** 10, 4 ** 11],
-         [4 ** 7, 4 ** 6, 4 ** 5, 4 ** 4],
-         [4 ** 0, 4 ** 1, 4 ** 2, 4 ** 3]]
+    w = [[16, 15, 14,13],
+         [9, 10, 11, 12],
+         [8, 7, 6, 5],
+         [1, 2, 3, 4]]
 
     eval = 0
 
@@ -110,9 +110,8 @@ def heuristic(child_state, score, board_score):
         for j in range(4):
             eval += w[i][j] * child_state[i][j]
 
-    #print('eval', eval)
 
-    heuristic_score += eval*0.00000001*(score-board_score) if (score-board_score)>0 else eval*0.0000001
+    heuristic_score += eval*(1+score-board_score)
 
     return heuristic_score
 
@@ -126,7 +125,6 @@ def calculate_heuristics_scores(node, board):
 
 
 def mcts_search(root_node, num_iterations, board):
-    print(root_node.parent)
     board_copy = copy.deepcopy(board)
     initial_children_rewards(root_node, board_copy)
     calculate_heuristics_scores(root_node, board_copy)
