@@ -15,7 +15,7 @@ def select_action(node):
         exploitation_term = child.reward / child.visits if child.visits > 0 else 0
         exploration_term = math.sqrt(2*(math.log(node.visits)) / child.visits) if child.visits > 0 else float('inf')
         ucb_value = child.heuristic_score+(exploration_term+exploitation_term)
-        print('child heuristic score:', child.heuristic_score, 'exploitation:', exploitation_term, 'visit:', child.visits)
+        #print('child heuristic score:', child.heuristic_score, 'exploitation:', exploitation_term, 'visit:', child.visits)
 
         if ucb_value > best_ucb_value:
             best_ucb_value = ucb_value
@@ -62,7 +62,7 @@ def simulate(node, board):
     board_copy = copy.deepcopy(board)
     reward = 0
     game_state = node.state
-    while not board_copy.game_over():
+    while not board_copy.board_is_full():
         move = random.choice(board_copy.generate_move_options_user())
         board_copy = apply_move(board_copy, move[0], move[1])
         reward = calculate_reward(board_copy)
@@ -151,6 +151,5 @@ def mcts_search(root_node, num_iterations, board):
           # Select the best action based on visit counts or other criteria
 
     best_action = select_action(root_node)
-
 
     return best_action

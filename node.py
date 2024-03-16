@@ -18,9 +18,6 @@ class Node:
         if board.board_is_full():
             return True
 
-        if board.winning_condition():
-            return True
-
         return False
 
     def is_fully_expanded(self, board):

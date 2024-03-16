@@ -133,15 +133,6 @@ class Board:
             self.board_values[random_empty_cell[0]][random_empty_cell[1]] = 2
         return self.board_values
 
-    def generate_move_options_chance(self):
-        for row in range(4):
-            for col in range(4):
-                if self.board_values[row][col] == 0:
-                    empty_cells.append((row, col))
-
-        if len(empty_cells) == 0:
-            return self.board_values
-
 
 
     # draw background for the board
@@ -195,14 +186,5 @@ class Board:
                 return False
 
         return True
-    def winning_condition(self):
-        for row in range(4):
-            for col in range(4):
-                if self.board_values[row][col] == 2048:
-                    return True
-        return False
 
-    def game_over(self):
-        if self.winning_condition() or self.board_is_full():
-            return True
-        return False
+

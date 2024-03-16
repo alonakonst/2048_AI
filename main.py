@@ -54,23 +54,18 @@ while run:
         board.get_new = False
         board.init_count +=1
 
-    if board.board_is_full():
-        print('its full, you lost')
-        run = False
-
-
 
     if board.board_is_full():
-        print('its full, you lost')
-        run = False
+        #print('Game over')
+        max_value = 0
+        for row in range(4):
+            for col in range(4):
+                if board.board_values[row][col] > max_value:
+                    max_value = board.board_values[row][col]
 
-    if board.winning_condition():
-        print('you won')
-        run = False
-
-    if board.game_over():
-        print('Game over')
         print("Game final score:", board.score)
+        print("Max value:", max_value)
+        run = False
 
 
 
@@ -135,7 +130,7 @@ while run:
         time = 0.2
         # maybe it doesnt have to create a node tree each time
 
-        node = mcts_search(node, 5, board)
+        node = mcts_search(node, 10, board)
 
         board = apply_move(board, node, node.score)
 
@@ -147,6 +142,7 @@ while run:
     draw_button()
 
     pygame.display.flip()
+
 
 
 pygame.quit()
