@@ -1,7 +1,11 @@
+'''
+Board class contains all proprties and functions of the game
+'''
+
+
 import pygame
 import random
 import copy
-
 
 class Board:
     def __init__(self):
@@ -10,8 +14,7 @@ class Board:
         self.init_count = 0
         self.key_direction = ''
         self.score = 0
-
-        # 2048 game colour library (taking from this tutorial: https://www.youtube.com/watch?v=rp9s1O3iSEQ)
+        # 2048 game colour library (taking from this tutorial: https://github.com/plemaster01/Python2048)
         self.colors = {0: (204, 192, 179),
                        2: (238, 228, 218),
                        4: (237, 224, 200),
@@ -29,6 +32,8 @@ class Board:
                        'other': (0, 0, 0),
                        'bg': (187, 173, 160)}
 
+
+    #following four functions define the movement of the game: up, down, right, left. The impementation of this functions is inspired by same tutorial https://github.com/plemaster01/Python2048
     def turn_up(self,board_values):
         merged = [[False for _ in range(4)] for _ in range(4)]
         for row in range(4):
@@ -160,6 +165,7 @@ class Board:
                     text_rect = value_text.get_rect(center=(j * 70 + 48.125, (screen_height * 0.25) + i * 70 + 48.125))
                     screen.blit(value_text, text_rect)
 
+    #generate possible movements from the fiven board
     def generate_move_options_user(self):
         # Create copies of the current board state
         board_up = copy.deepcopy(self)
@@ -175,6 +181,7 @@ class Board:
 
         return current_options
 
+    #checks if board is full by looking if there is difference in possible movements from the given board
     def board_is_full(self):
         for row in range(4):
             for col in range(4):
@@ -186,5 +193,3 @@ class Board:
                 return False
 
         return True
-
-

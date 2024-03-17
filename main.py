@@ -20,27 +20,12 @@ font_name = 'freesansbold.ttf'
 font_size = 24
 font = pygame.font.Font(font_name, font_size)
 
-
+#Initializing a board and root node of the game which state is identical to initial board values.
 board = Board()
-node = Node(board.board_values, score=board.score)
-
-time = 2
-
-#define a button
-button = pygame.Rect(10, 10, 200, 50)
-def draw_button():
-    button_font = pygame.font.Font(font_name, 12)
-    button_color_default = board.colors['bg']
-    button_color_pressed = board.colors[0]
-    button_pressed = False
-    button_color = button_color_pressed if button_pressed else button_color_default
-    pygame.draw.rect(screen, button_color, button, border_radius=10)
-    button_text = button_font.render('Press for AI to play', True, (255, 255, 255))  # Render the text
-    text_rect = button_text.get_rect(center=(110, 35))  # Position the text in the center of the button
-    screen.blit(button_text, text_rect)  # Draw the text on th
+time = 2 #this is a variable for controlling display speed of AI solution below
 
 
-# Main loop
+# Main loop of the game
 run = True
 while run:
     timer.tick(fps)
@@ -48,15 +33,19 @@ while run:
     board.draw_board(screen,screen_width,screen_height)
     board.draw_pieces(board.board_values,font_name,screen,screen_height)
 
+    if board.init_count==2:
+        node = Node(board.board_values, score=board.score) #initializing root node of the game when first two tiles are added to the board
+        print(node.state)
+        board.init_count +=1
 
+    #getting new tiles(relevan only for when user plays a game)
     if board.get_new or board.init_count < 2:
         board_values = board.get_new_tiles()
         board.get_new = False
         board.init_count +=1
 
-
+    #quitting main loop if the board is full
     if board.board_is_full():
-        #print('Game over')
         max_value = 0
         for row in range(4):
             for col in range(4):
@@ -67,8 +56,7 @@ while run:
         print("Max value:", max_value)
         run = False
 
-
-
+    #event handeling
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
@@ -77,69 +65,47 @@ while run:
         if event.type == pygame.KEYUP:
 
             if event.key == pygame.K_UP:
-                board_temp = tuple(map(tuple, board.board_values))  # Convert to tuple for comparison
+                board_temp = tuple(map(tuple, board.board_values))
                 board_values = board.turn_up(board.board_values)
                 key_direction = ''
-                if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
+                if tuple(map(tuple, board_values)) != board_temp:
                     board.get_new = True
 
             if event.key == pygame.K_DOWN:
                 board_temp = tuple(map(tuple, board.board_values))
                 board_values = board.turn_down(board.board_values)
                 key_direction = ''
-                if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
+                if tuple(map(tuple, board_values)) != board_temp:
                     board.get_new = True
 
             elif event.key == pygame.K_LEFT:
-                board_temp = tuple(map(tuple, board.board_values))  # Convert to tuple for comparison
+                board_temp = tuple(map(tuple, board.board_values))
                 board_values = board.turn_left(board.board_values)
                 key_direction = ''
-                if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
+                if tuple(map(tuple, board_values)) != board_temp:
                     board.get_new = True
 
 
             elif event.key == pygame.K_RIGHT:
-                board_temp = tuple(map(tuple, board.board_values))  # Convert to tuple for comparison
+                board_temp = tuple(map(tuple, board.board_values))
                 board_values = board.turn_right(board.board_values)
                 key_direction = ''
-                if tuple(map(tuple, board_values)) != board_temp:  # Compare tuples instead of lists
+                if tuple(map(tuple, board_values)) != board_temp:
                     board.get_new = True
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left mouse button
-                if button.collidepoint(event.pos):  # Check if the mouse click is within the button
-                    button_pressed = True
 
-
-
-
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:  # Left mouse button
-                button_pressed = False
-
-
-            # Calculate time difference for this iteration
-
+    #This block is responsible for calling monte carlo tree search. It can be commented out in order for user to play a game using keys
     dt = clock.tick(60) / 1000
-    # Update the timer
-
-
     time -= dt
     if time <= 0:
-        # Reset the timer
         time = 0.2
-        # maybe it doesnt have to create a node tree each time
-
-        node = mcts_search(node, 10, board)
-
+        node = mcts_search(node, 1, board)
         board = apply_move(board, node, node.score)
-
         board.get_new = True
         if board.get_new:
             board.get_new_tiles()
             board.get_new = False
 
-    draw_button()
 
     pygame.display.flip()
 
