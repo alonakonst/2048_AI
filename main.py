@@ -1,5 +1,3 @@
-import pygame
-import random
 from mcts import *
 from node import Node
 from board import Board
@@ -24,6 +22,7 @@ font = pygame.font.Font(font_name, font_size)
 board = Board()
 time = 2 #this is a variable for controlling display speed of AI solution below
 
+ai_play = False
 
 # Main loop of the game
 run = True
@@ -35,7 +34,6 @@ while run:
 
     if board.init_count==2:
         node = Node(board.board_values, score=board.score) #initializing root node of the game when first two tiles are added to the board
-        print(node.state)
         board.init_count +=1
 
     #getting new tiles(relevan only for when user plays a game)
@@ -94,17 +92,21 @@ while run:
                     board.get_new = True
 
 
-    #This block is responsible for calling monte carlo tree search. It can be commented out in order for user to play a game using keys
-    dt = clock.tick(60) / 1000
-    time -= dt
-    if time <= 0:
-        time = 0.2
-        node = mcts_search(node, 1, board)
-        board = apply_move(board, node, node.score)
-        board.get_new = True
-        if board.get_new:
-            board.get_new_tiles()
-            board.get_new = False
+
+    ai_play = True # comment out if you want to play the game yourself using arrow keys
+
+    # This block is responsible for calling monte carlo tree search.
+    if ai_play:
+        dt = clock.tick(60) / 1000
+        time -= dt
+        if time <= 0:
+            time = 0.2
+            node = mcts_search(node, 1, board) #change second parameter to chose number of simulations
+            board = apply_move(board, node, node.score)
+            board.get_new = True
+            if board.get_new:
+                board.get_new_tiles()
+                board.get_new = False
 
 
     pygame.display.flip()
