@@ -1,5 +1,3 @@
-import pygame
-import random
 from mcts import *
 from node import Node
 from board import Board
@@ -36,7 +34,6 @@ while run:
 
     if board.init_count==2:
         node = Node(board.board_values, score=board.score) #initializing root node of the game when first two tiles are added to the board
-        print(node.state)
         board.init_count +=1
 
     #getting new tiles(relevan only for when user plays a game)
@@ -104,7 +101,7 @@ while run:
         time -= dt
         if time <= 0:
             time = 0.2
-            node = mcts_search(node, 1, board)
+            node = mcts_search(node, 1, board) #change second parameter to chose number of simulations
             board = apply_move(board, node, node.score)
             board.get_new = True
             if board.get_new:
