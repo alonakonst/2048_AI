@@ -5,7 +5,7 @@ from board import Board
 clock = pygame.time.Clock()
 pygame.init()
 
-#initial setup: screen size, game caption, predetermined speed, font size
+#initial setup: screen size, game caption, predetermined speed, font
 screen_width = 300
 screen_height = 400
 screen = pygame.display.set_mode((screen_width, screen_height))
